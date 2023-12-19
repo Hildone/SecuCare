@@ -59,7 +59,9 @@ app.post('/create', async (req, res) => {
   }
 });
 
-
+app.get('/', (req, res) => {
+  res.send('Hello, World!');
+});
 
 app.get('/read/all', async (req, res) => {
     try {
