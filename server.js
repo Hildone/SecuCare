@@ -77,7 +77,7 @@ app.get('/read/all', async (req, res) => {
     }
 });
 
-app.get('/read/id', async (req, res) => {
+app.get('/read/:id', async (req, res) => {
     try {
         const userRef = db.collection("users").doc(req.params.id);
         const response = await userRef.get();
