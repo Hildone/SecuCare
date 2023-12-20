@@ -9,7 +9,7 @@ const credentials = require("./serviceAccountKey.json");
 const path = require('path');
 const multer = require('multer');
 const {Storage} = require('@google-cloud/storage');
-
+const upload = multer({ storage: multer.memoryStorage() })
 
 const storage = new Storage({
   projectId: 'secucare-406900',
@@ -18,12 +18,7 @@ const storage = new Storage({
 
 const bucket = storage.bucket('secucare');
 
-const upload = multer({
-  storage: multer.memoryStorage(),
-  limits: {
-    fileSize: 25 * 1024 * 1024, // limit file size to 25MB
-  },
-});
+
 
 
 
@@ -59,9 +54,7 @@ app.post('/create', async (req, res) => {
   }
 });
 
-app.get('/', (req, res) => {
-  res.send('Hello, World!');
-});
+
 
 app.get('/read/all', async (req, res) => {
     try {
@@ -79,12 +72,17 @@ app.get('/read/all', async (req, res) => {
 
 app.get('/read/:id', async (req, res) => {
     try {
+        
         const userRef = db.collection("users").doc(req.params.id);
         const response = await userRef.get();
         res.send(response.data());
     }   catch(error) {
         res.send(error);
     }
+});
+
+app.get('/', (req, res) => {
+  res.send('Hello, World!');
 });
 
 app.post('/update', async (req, res) => {
@@ -145,7 +143,7 @@ app.post('/login', async (req, res) => {
 });
 
 // upload foto
-app.post('/upload', upload.single('photo'), (req, res) => {
+app.post('/upload', upload.single('file'), (req, res, next) => {
     if (!req.file) {
       res.status(400).send('No file uploaded.');
       return;
@@ -165,7 +163,13 @@ app.post('/upload', upload.single('photo'), (req, res) => {
     });
   
     blobStream.end(req.file.buffer);
-  });
+}, (error, req, res, next) => {
+    if (error instanceof multer.MulterError) {
+        res.status(500).send(error.message);
+    } else {
+        next(error);
+    }
+});
 
  
 
