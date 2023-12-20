@@ -167,35 +167,7 @@ app.post('/upload', upload.single('photo'), (req, res) => {
     blobStream.end(req.file.buffer);
   });
 
- app.get('/getNearest', async (req, res) => {
-  try {
-    const latitude = req.query.latitude;
-    const longitude = req.query.longitude;
-
-    // Query for all users
-    const userRef = db.collection("users");
-    const users = await userRef.get();
-
-    // Initialize results array
-    const results = [];
-
-    // Iterate over all users
-    users.forEach((doc) => {
-      // Calculate distance between user and center point
-      const distance = admin.firestore.GeoPoint.distance(doc.data().currentLocation, new admin.firestore.GeoPoint(latitude, longitude));
-
-      // Add user to results if distance is less than 2km
-      if (distance <= 2000) {
-        results.push(doc.data());
-      }
-    });
-
-    // Send results to client
-    res.send(results);
-  } catch (error) {
-    res.send(error);
-  }
-});
+ 
 
 app.get('/getNearest', async (req, res) => {
     try {
