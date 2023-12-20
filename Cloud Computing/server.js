@@ -6,7 +6,24 @@ const saltRounds = 10;
 const tf = require('@tensorflow/tfjs');
 const admin = require("firebase-admin");
 const credentials = require("./serviceAccountKey.json");
+const path = require('path');
+const multer = require('multer');
+const {Storage} = require('@google-cloud/storage');
+const upload = multer({ storage: multer.memoryStorage() })
 
+const storage = new Storage({
+  projectId: 'secucare-406900',
+  keyFilename: './serviceAccountKey.json'
+});
+
+const bucket = storage.bucket('secucare');
+
+
+
+
+
+
+ 
 
 admin.initializeApp({
     credential: admin.credential.cert(credentials)
@@ -27,7 +44,8 @@ app.post('/create', async (req, res) => {
             name: req.body.name,
             password: req.body.password,
             lokasi: new admin.firestore.GeoPoint(req.body.latitude, req.body.longitude),
-            phoneNum: req.body.phoneNum
+            phoneNum: req.body.phoneNum,
+            distance: 0
         }; 
     const response = await db.collection("users").add(userJson);
     res.send(response);
@@ -52,14 +70,19 @@ app.get('/read/all', async (req, res) => {
     }
 });
 
-app.get('/read/id', async (req, res) => {
+app.get('/read/:id', async (req, res) => {
     try {
+        
         const userRef = db.collection("users").doc(req.params.id);
         const response = await userRef.get();
         res.send(response.data());
     }   catch(error) {
         res.send(error);
     }
+});
+
+app.get('/', (req, res) => {
+  res.send('Hello, World!');
 });
 
 app.post('/update', async (req, res) => {
@@ -119,6 +142,66 @@ app.post('/login', async (req, res) => {
     }
 });
 
+// upload foto
+app.post('/upload', upload.single('file'), (req, res, next) => {
+    if (!req.file) {
+      res.status(400).send('No file uploaded.');
+      return;
+    }
+  
+    const blob = bucket.file(req.file.originalname);
+    const blobStream = blob.createWriteStream();
+  
+    blobStream.on('error', err => {
+      console.error(err);
+      res.status(500).send(err);
+    });
+  
+    blobStream.on('finish', () => {
+      const publicUrl = `https://storage.googleapis.com/${bucket.name}/${blob.name}`;
+      res.status(200).send(publicUrl);
+    });
+  
+    blobStream.end(req.file.buffer);
+}, (error, req, res, next) => {
+    if (error instanceof multer.MulterError) {
+        res.status(500).send(error.message);
+    } else {
+        next(error);
+    }
+});
+
+ 
+
+app.get('/getNearest', async (req, res) => {
+    try {
+      const latitude = req.query.latitude;
+      const longitude = req.query.longitude;
+  
+      // Query for all users
+      const userRef = db.collection("users");
+      const users = await userRef.get();
+  
+      // Initialize results array
+      const results = [];
+  
+      // Iterate over all users
+      users.forEach((doc) => {
+        // Calculate distance between user and center point
+        const distance = admin.firestore.GeoPoint.distance(doc.data().lokasi, new admin.firestore.GeoPoint(latitude, longitude));
+  
+        // Add user to results if distance is less than 2km
+        if (distance <= 2000) {
+          results.push(doc.data());
+        }
+      });
+  
+      // Send results to client
+      res.send(results);
+    } catch (error) {
+      res.send(error);
+    }
+  });
 
 
 const PORT = process.env.PORT || 8080;  
