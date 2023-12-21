@@ -7,6 +7,7 @@ const tf = require('@tensorflow/tfjs');
 const admin = require("firebase-admin");
 const credentials = require("./serviceAccountKey.json");
 const path = require('path');
+const jwt = require('jsonwebtoken');
 const multer = require('multer');
 const {Storage} = require('@google-cloud/storage');
 const upload = multer({ storage: multer.memoryStorage() })
@@ -138,7 +139,11 @@ app.post('/login', async (req, res) => {
             res.status(400).send('Invalid email or password');
             return;
         }
-        res.send('Logged in successfully');
+
+        // User is authenticated, generate a token
+        const token = jwt.sign({ userId: userData.id }, 'your-secret-key', { expiresIn: '1h' });
+
+        res.send({ message: 'Logged in successfully', token });
     } catch(error) {
         res.send(error);
     }
