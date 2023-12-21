@@ -10,6 +10,8 @@ const path = require('path');
 const multer = require('multer');
 const {Storage} = require('@google-cloud/storage');
 const upload = multer({ storage: multer.memoryStorage() })
+const PORT = process.env.PORT || 8080;
+const HOST = process.env.HOST || '0.0.0.0';
 
 const storage = new Storage({
   projectId: 'secucare-406900',
@@ -82,7 +84,7 @@ app.get('/read/:id', async (req, res) => {
 });
 
 app.get('/', (req, res) => {
-  res.send('Hello, World!');
+  res.send('server is succesfully running.');
 });
 
 app.post('/update', async (req, res) => {
@@ -203,7 +205,41 @@ app.get('/getNearest', async (req, res) => {
     }
   });
 
+    // Endpoint to upload location
+app.post('/location', async (req, res) => {
+    try {
+        const userId = req.body.userId;
+        const location = { latitude: req.body.latitude, longitude: req.body.longitude };
 
-const PORT = process.env.PORT || 8080;  
-app.listen(PORT, () => {console.log('server is running on PORT ${PORT}.');
+        // Save location to database...
+        const userRef = admin.firestore().collection('users').doc(userId);
+        await userRef.update({ location });
+
+        res.status(200).send('Location updated');
+    } catch (error) {
+        res.status(500).send(error);
+    }
+});
+
+// Endpoint to get location
+app.get('/location/:userId', async (req, res) => {
+    try {
+        const userId = req.params.userId;
+
+        // Get location from database...
+        const userRef = admin.firestore().collection('users').doc(userId);
+        const doc = await userRef.get();
+        if (!doc.exists) {
+            res.status(404).send('User not found');
+        } else {
+            res.status(200).send(doc.data().location);
+        }
+    } catch (error) {
+        res.status(500).send(error);
+    }
+});
+
+
+
+app.listen(PORT, HOST, () => {console.log('Running on http://${HOST}:${PORT}');
 });
