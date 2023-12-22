@@ -33,7 +33,7 @@ model.compile(
 )
 
 history = model.fit(x_train,y_train, epochs=1000)
-model.save("saved_model/WakeWord.h5")
+model.save("saved_model/Model.h5")
 print(model.evaluate(x_test, y_test))
 
 y_pred = np.argmax(model.predict(x_test), axis=1)
