@@ -220,12 +220,11 @@ app.post('/location/:id', async (req, res) => {
         const userRef = admin.firestore().collection('users').doc(id);
         await userRef.update({ lokasi: new admin.firestore.GeoPoint(location.latitude, location.longitude) });
 
-        res.status(200).send('Location updated');
+        res.status(200).json({ message: 'Location updated', location });
     } catch (error) {
         res.status(500).send(error);
     }
 });
-
 // Endpoint to get location
 app.get('/location/:id', async (req, res) => {
     try {
