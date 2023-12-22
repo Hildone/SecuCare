@@ -24,8 +24,8 @@ def rekam_audio_background(save_path, n_kali=33):
         print(f"Sekarang Sedang Berada Di : {i+1}/{n_kali}")
         
         
-#print("Merekam WakeWord Audio: \n")
-#rekam_wakeword_audio("dataaudio/")
+print("Merekam WakeWord Audio: \n")
+rekam_wakeword_audio("dataaudio/")
 
 print("Merekam WakeWord Audio: \n")
 rekam_audio_background("bgaudio/")
