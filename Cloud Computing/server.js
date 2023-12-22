@@ -210,15 +210,15 @@ app.get('/getNearest', async (req, res) => {
     }
   });
 
-    // Endpoint to upload location
-app.post('/location', async (req, res) => {
+ // Endpoint to upload location
+app.post('/location/:id', async (req, res) => {
     try {
-        const userId = req.body.userId;
+        const id = req.params.id;
         const location = { latitude: req.body.latitude, longitude: req.body.longitude };
 
         // Save location to database...
-        const userRef = admin.firestore().collection('users').doc(userId);
-        await userRef.update({ location });
+        const userRef = admin.firestore().collection('users').doc(id);
+        await userRef.update({ lokasi: new admin.firestore.GeoPoint(location.latitude, location.longitude) });
 
         res.status(200).send('Location updated');
     } catch (error) {
@@ -227,17 +227,18 @@ app.post('/location', async (req, res) => {
 });
 
 // Endpoint to get location
-app.get('/location/:userId', async (req, res) => {
+app.get('/location/:id', async (req, res) => {
     try {
-        const userId = req.params.userId;
+        const id = req.params.id;
 
         // Get location from database...
-        const userRef = admin.firestore().collection('users').doc(userId);
+        const userRef = admin.firestore().collection('users').doc(id);
         const doc = await userRef.get();
         if (!doc.exists) {
             res.status(404).send('User not found');
         } else {
-            res.status(200).send(doc.data().location);
+            const location = doc.data().lokasi;
+            res.status(200).json({ latitude: location.latitude, longitude: location.longitude });
         }
     } catch (error) {
         res.status(500).send(error);
