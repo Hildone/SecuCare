@@ -12,4 +12,6 @@
 ### Here is a link to our raw dataset : 
 [Dataset-VoiceRecognition](https://drive.google.com/drive/folders/1EBHCdvuKrRydTHwajohGZNZNV10BsdS6)
 
+### Here is a link to our code in Colab :
 
+[Voice-Recognition](https://colab.research.google.com/drive/15phoJ4CN1oDyBGkuhiwfO4SGp2wQSPWD#scrollTo=w3pE7u7-0j1d)
