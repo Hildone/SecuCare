@@ -3,7 +3,7 @@ from scipy.io.wavfile import write
 
 
 def rekam_wakeword_audio(save_path, n_kali=20):
-    input("Untuk merekam audio wake word tekan Enter : ")
+    input("Untuk merekam audio Tolong tekan Enter : ")
     for i in range (n_kali):
         fs = 44100
         detik = 3
@@ -24,9 +24,9 @@ def rekam_audio_background(save_path, n_kali=33):
         print(f"Sekarang Sedang Berada Di : {i+1}/{n_kali}")
         
         
-print("Merekam WakeWord Audio: \n")
+print("Merekam Tolong Audio: \n")
 rekam_wakeword_audio("dataaudio/")
 
-print("Merekam WakeWord Audio: \n")
+print("Merekam non-Tolong Audio: \n")
 rekam_audio_background("bgaudio/")
 
